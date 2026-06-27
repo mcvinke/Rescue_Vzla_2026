@@ -12,7 +12,15 @@ import {
 } from "react"
 import { db, isFirebaseConfigured } from "./firebase"
 import { SEED_BUILDINGS } from "./seed-data"
-import type { Building, BuildingDoc, MissingPersonDoc, Victim, VictimStatus } from "./types"
+import type {
+  Building,
+  BuildingDoc,
+  MissingPersonDoc,
+  NewSocialImport,
+  SocialImport,
+  Victim,
+  VictimStatus,
+} from "./types"
 
 // Bump this when the bundled sample data changes (e.g. new cities added) so
 // already-populated databases receive the new samples exactly once per device.
@@ -24,11 +32,14 @@ type NewVictim = Omit<Victim, "id">
 
 interface RescueStore {
   buildings: Building[]
+  socialImports: SocialImport[]
   loading: boolean
   live: boolean
   addBuilding: (data: NewBuilding) => Promise<string>
   addVictim: (buildingId: string, victim: NewVictim) => Promise<void>
   setVictimStatus: (buildingId: string, victimId: string, status: VictimStatus) => Promise<void>
+  addSocialImport: (data: NewSocialImport) => Promise<string>
+  updateSocialImport: (id: string, patch: Partial<SocialImport>) => Promise<void>
 }
 
 const StoreContext = createContext<RescueStore | null>(null)
@@ -75,6 +86,7 @@ export function RescueStoreProvider({ children }: { children: ReactNode }) {
   const seed = useMemo(splitSeed, [])
   const [meta, setMeta] = useState<BuildingDoc[]>(isFirebaseConfigured ? [] : seed.meta)
   const [persons, setPersons] = useState<MissingPersonDoc[]>(isFirebaseConfigured ? [] : seed.persons)
+  const [socialImports, setSocialImports] = useState<SocialImport[]>([])
   const [loadedBuildings, setLoadedBuildings] = useState<boolean>(!isFirebaseConfigured)
   const [loadedPersons, setLoadedPersons] = useState<boolean>(!isFirebaseConfigured)
   // Guards the one-time sample top-up so it can't run on every snapshot.
@@ -138,6 +150,13 @@ export function RescueStoreProvider({ children }: { children: ReactNode }) {
           setLoadedPersons(true)
         }),
       )
+
+      const importsRef = collection(db, "socialImports")
+      unsubs.push(
+        onSnapshot(query(importsRef, orderBy("createdAt", "desc")), (snap) => {
+          setSocialImports(snap.docs.map((d) => d.data() as SocialImport))
+        }),
+      )
     })()
 
     return () => unsubs.forEach((u) => u())
@@ -199,12 +218,45 @@ export function RescueStoreProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const addSocialImport = useCallback<RescueStore["addSocialImport"]>(async (data) => {
+    const id = newId()
+    const record: SocialImport = { ...data, id, linkedRecordId: "", createdAt: Date.now(), reviewedAt: null }
+
+    if (isFirebaseConfigured && db) {
+      const { doc, setDoc } = await import("firebase/firestore")
+      // Client-side id + setDoc so the import queues offline and replays on reconnect.
+      await setDoc(doc(db, "socialImports", id), record)
+    } else {
+      setSocialImports((prev) => [record, ...prev])
+    }
+    return id
+  }, [])
+
+  const updateSocialImport = useCallback<RescueStore["updateSocialImport"]>(async (id, patch) => {
+    if (isFirebaseConfigured && db) {
+      const { doc, updateDoc } = await import("firebase/firestore")
+      await updateDoc(doc(db, "socialImports", id), patch)
+    } else {
+      setSocialImports((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)))
+    }
+  }, [])
+
   const buildings = useMemo(() => mergeBuildings(meta, persons), [meta, persons])
   const loading = !(loadedBuildings && loadedPersons)
 
   const value = useMemo<RescueStore>(
-    () => ({ buildings, loading, live: isFirebaseConfigured, addBuilding, addVictim, setVictimStatus }),
-    [buildings, loading, addBuilding, addVictim, setVictimStatus],
+    () => ({
+      buildings,
+      socialImports,
+      loading,
+      live: isFirebaseConfigured,
+      addBuilding,
+      addVictim,
+      setVictimStatus,
+      addSocialImport,
+      updateSocialImport,
+    }),
+    [buildings, socialImports, loading, addBuilding, addVictim, setVictimStatus, addSocialImport, updateSocialImport],
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

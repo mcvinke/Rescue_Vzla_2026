@@ -85,6 +85,53 @@ export interface MissingPersonDoc extends Victim {
   updatedAt: number
 }
 
+// ---------------------------------------------------------------------------
+// Social media monitoring & import
+// ---------------------------------------------------------------------------
+
+/** Platforms coordinators import posts from. `id` is stored; `label` is shown. */
+export const IMPORT_PLATFORMS = [
+  "twitter",
+  "instagram",
+  "tiktok",
+  "telegram",
+  "whatsapp",
+  "facebook",
+  "news",
+  "other",
+] as const
+export type ImportPlatform = (typeof IMPORT_PLATFORMS)[number]
+
+export type SignalType = "missing_person" | "building" | "unclear"
+export type ImportStatus = "pending" | "verifying" | "verified" | "discarded"
+
+/**
+ * Raw log of a social-media post a coordinator pasted in, plus the fields the
+ * auto-parser extracted. Always unverified until a coordinator reviews it.
+ * Stored in its own top-level `socialImports` collection.
+ */
+export interface SocialImport {
+  id: string
+  /** The full original post text, kept verbatim for verification. */
+  originalText: string
+  platform: ImportPlatform
+  sourceUrl: string
+  /** Date of the post (ms epoch), defaults to import time. */
+  postedAt: number
+  parsedName: string
+  parsedLocation: string
+  parsedPhone: string
+  signalType: SignalType
+  status: ImportStatus
+  /** Id of the missingPersons / buildings doc created when verified, if any. */
+  linkedRecordId: string
+  createdAt: number
+  reviewedAt: number | null
+  reviewedBy: string
+}
+
+export type NewSocialImport = Omit<SocialImport, "id" | "createdAt" | "reviewedAt" | "linkedRecordId">
+
 export const SEVERITY_ORDER: Record<Severity, number> = {
   collapsed: 4,
   severe: 3,

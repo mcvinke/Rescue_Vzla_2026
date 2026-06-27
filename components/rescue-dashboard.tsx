@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import dynamic from "next/dynamic"
-import { List, Map as MapIcon, Plus, Search } from "lucide-react"
+import { List, Map as MapIcon, Plus, Radar, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useI18n } from "@/lib/i18n"
@@ -15,6 +15,7 @@ import { PriorityList } from "./priority-list"
 import { BuildingDetail } from "./building-detail"
 import { ReportBuildingDialog } from "./report-building-dialog"
 import { AddVictimDialog } from "./add-victim-dialog"
+import { SocialMonitor } from "./social/social-monitor"
 
 const RescueMap = dynamic(() => import("./map/rescue-map"), {
   ssr: false,
@@ -27,6 +28,7 @@ export function RescueDashboard() {
   const { t } = useI18n()
   const { buildings, live } = useRescueStore()
 
+  const [tab, setTab] = useState<"map" | "social">("map")
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
   const [city, setCity] = useState<string>("all")
@@ -65,6 +67,84 @@ export function RescueDashboard() {
     <div className="flex h-dvh flex-col overflow-hidden">
       <StatsHeader buildings={buildings} live={live} />
 
+      {/* Primary tabs: rescue map vs social monitoring */}
+      <div className="flex items-center gap-1 border-b border-border bg-card px-2 py-1.5">
+        <TabButton active={tab === "map"} onClick={() => setTab("map")}>
+          <MapIcon className="size-4" />
+          {t("tabMap")}
+        </TabButton>
+        <TabButton active={tab === "social"} onClick={() => setTab("social")}>
+          <Radar className="size-4" />
+          {t("tabSocial")}
+        </TabButton>
+      </div>
+
+      {tab === "social" ? (
+        <div className="min-h-0 flex-1 overflow-y-auto bg-background">
+          <SocialMonitor />
+        </div>
+      ) : (
+        <MapWorkspace
+          filtered={filtered}
+          selected={selected}
+          selectedId={selectedId}
+          search={search}
+          setSearch={setSearch}
+          city={city}
+          setCity={setCity}
+          filter={filter}
+          setFilter={setFilter}
+          mobileView={mobileView}
+          setMobileView={setMobileView}
+          onSelect={handleSelect}
+          onClearSelected={() => setSelectedId(null)}
+          onReport={() => setReportOpen(true)}
+          onAddVictim={() => setVictimOpen(true)}
+        />
+      )}
+
+      <ReportBuildingDialog open={reportOpen} onOpenChange={setReportOpen} />
+      <AddVictimDialog buildingId={selectedId} open={victimOpen} onOpenChange={setVictimOpen} />
+    </div>
+  )
+}
+
+function MapWorkspace({
+  filtered,
+  selected,
+  selectedId,
+  search,
+  setSearch,
+  city,
+  setCity,
+  filter,
+  setFilter,
+  mobileView,
+  setMobileView,
+  onSelect,
+  onClearSelected,
+  onReport,
+  onAddVictim,
+}: {
+  filtered: Building[]
+  selected: Building | null
+  selectedId: string | null
+  search: string
+  setSearch: (v: string) => void
+  city: string
+  setCity: (v: string) => void
+  filter: Severity | "all"
+  setFilter: (v: Severity | "all") => void
+  mobileView: "map" | "list"
+  setMobileView: (v: "map" | "list") => void
+  onSelect: (id: string) => void
+  onClearSelected: () => void
+  onReport: () => void
+  onAddVictim: () => void
+}) {
+  const { t } = useI18n()
+  return (
+    <>
       {/* Mobile view toggle */}
       <div className="flex items-center gap-1 border-b border-border bg-card p-2 lg:hidden">
         <Button
@@ -96,11 +176,7 @@ export function RescueDashboard() {
           )}
         >
           {selected ? (
-            <BuildingDetail
-              building={selected}
-              onClose={() => setSelectedId(null)}
-              onAddVictim={() => setVictimOpen(true)}
-            />
+            <BuildingDetail building={selected} onClose={onClearSelected} onAddVictim={onAddVictim} />
           ) : (
             <>
               <div className="space-y-3 border-b border-border p-4">
@@ -142,7 +218,7 @@ export function RescueDashboard() {
                     </FilterChip>
                   ))}
                 </div>
-                <Button className="w-full" onClick={() => setReportOpen(true)}>
+                <Button className="w-full" onClick={onReport}>
                   <Plus />
                   {t("reportBuilding")}
                 </Button>
@@ -152,7 +228,7 @@ export function RescueDashboard() {
                 <span className="text-xs text-muted-foreground">{filtered.length}</span>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <PriorityList buildings={filtered} selectedId={selectedId} onSelect={handleSelect} />
+                <PriorityList buildings={filtered} selectedId={selectedId} onSelect={onSelect} />
               </div>
             </>
           )}
@@ -160,13 +236,33 @@ export function RescueDashboard() {
 
         {/* Map */}
         <main className={cn("relative min-h-0 flex-1", mobileView === "list" && "hidden lg:block")}>
-          <RescueMap buildings={filtered} selectedId={selectedId} onSelect={handleSelect} />
+          <RescueMap buildings={filtered} selectedId={selectedId} onSelect={onSelect} />
         </main>
       </div>
+    </>
+  )
+}
 
-      <ReportBuildingDialog open={reportOpen} onOpenChange={setReportOpen} />
-      <AddVictimDialog buildingId={selectedId} open={victimOpen} onOpenChange={setVictimOpen} />
-    </div>
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+        active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
   )
 }
 

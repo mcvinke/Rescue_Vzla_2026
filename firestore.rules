@@ -28,6 +28,12 @@ service cloud.firestore {
     function validVictimStatus(v) {
       return v in ['missing', 'trapped', 'rescued', 'deceased'];
     }
+    function validSignalType(v) {
+      return v in ['missing_person', 'building', 'unclear'];
+    }
+    function validImportStatus(v) {
+      return v in ['pending', 'verifying', 'verified', 'discarded'];
+    }
 
     // ---- Buildings: site metadata ----
     match /buildings/{buildingId} {
@@ -61,6 +67,26 @@ service cloud.firestore {
 
       // People records are never deleted (only their status changes, e.g. to
       // "rescued"). This preserves an audit trail for accountability.
+      allow delete: if false;
+    }
+
+    // ---- Social imports: raw log of pasted social-media posts ----
+    // These are unverified by definition; the original post text is preserved
+    // verbatim so coordinators can audit and verify each one.
+    match /socialImports/{importId} {
+      allow read: if true;
+
+      allow create, update: if
+        request.resource.data.originalText is string &&
+        request.resource.data.originalText.size() > 0 &&
+        request.resource.data.originalText.size() <= 10000 &&
+        isString(request.resource.data.platform) &&
+        validSignalType(request.resource.data.signalType) &&
+        validImportStatus(request.resource.data.status) &&
+        isNumber(request.resource.data.createdAt);
+
+      // Discarding sets status to "discarded" rather than deleting, so the
+      // import trail (including possible misinformation) stays auditable.
       allow delete: if false;
     }
   }

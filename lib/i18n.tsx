@@ -117,6 +117,92 @@ const DICT: Dict = {
     es: "Conecta Firebase para sincronizar reportes entre todos los equipos.",
     en: "Connect Firebase to sync reports across all teams.",
   },
+
+  // Tabs
+  tabMap: { es: "Mapa", en: "Map" },
+  tabSocial: { es: "Redes / Social", en: "Social" },
+
+  // Social — import form
+  socialTitle: { es: "Monitoreo de redes sociales", en: "Social media monitoring" },
+  socialSubtitle: {
+    es: "Pega publicaciones de redes para convertirlas en reportes sin verificar.",
+    en: "Paste social posts to turn them into unverified reports.",
+  },
+  pastePost: { es: "Pega la publicación aquí", en: "Paste post here" },
+  pastePlaceholder: {
+    es: "Ej: Busco a mi tía María Pérez, desaparecida en el derrumbe de Playa Grande. Contacto 0414-1234567",
+    en: "E.g.: Looking for my aunt María Pérez, missing in the Playa Grande collapse. Contact 0414-1234567",
+  },
+  platform: { es: "Plataforma", en: "Platform" },
+  postUrl: { es: "Enlace de la publicación (opcional)", en: "Post URL or link (optional)" },
+  postDate: { es: "Fecha de la publicación", en: "Date of post" },
+  analyze: { es: "Analizar publicación", en: "Analyze post" },
+
+  // Platforms
+  pf_twitter: { es: "Twitter / X", en: "Twitter / X" },
+  pf_instagram: { es: "Instagram", en: "Instagram" },
+  pf_tiktok: { es: "TikTok", en: "TikTok" },
+  pf_telegram: { es: "Telegram", en: "Telegram" },
+  pf_whatsapp: { es: "WhatsApp", en: "WhatsApp" },
+  pf_facebook: { es: "Facebook", en: "Facebook" },
+  pf_news: { es: "Artículo de noticias", en: "News article" },
+  pf_other: { es: "Otro", en: "Other" },
+
+  // Parsed preview
+  unverified: { es: "Sin verificar", en: "Unverified" },
+  possibleName: { es: "Posible nombre", en: "Possible name" },
+  possibleLocation: { es: "Posible ubicación", en: "Possible location" },
+  possibleContact: { es: "Posible contacto", en: "Possible contact" },
+  signalTypeLabel: { es: "Tipo de señal", en: "Signal type" },
+  sig_missing_person: { es: "Persona desaparecida", en: "Missing person" },
+  sig_building: { es: "Edificio / derrumbe", en: "Building / collapse" },
+  sig_unclear: { es: "No determinado", en: "Unclear" },
+  originalPost: { es: "Texto original (solo lectura)", en: "Original post text (read only)" },
+  editBeforeSaving: { es: "Edita los campos antes de guardar", en: "Edit fields before saving" },
+  saveToFirestore: { es: "Guardar", en: "Save" },
+  discard: { es: "Descartar", en: "Discard" },
+  needsVerification: { es: "posible — requiere verificación", en: "possible — needs verification" },
+
+  // Queue
+  reviewQueue: { es: "Cola de revisión", en: "Review queue" },
+  queueEmpty: {
+    es: "No hay importaciones pendientes de revisión.",
+    en: "No imports pending review.",
+  },
+  unknownName: { es: "Sin nombre", en: "Unknown" },
+  verify: { es: "Verificar", en: "Verify" },
+  edit: { es: "Editar", en: "Edit" },
+  importedAt: { es: "Importado", en: "Imported" },
+
+  // Monitor links
+  manualMonitoring: { es: "Monitoreo manual", en: "Manual monitoring" },
+  manualMonitoringHint: {
+    es: "Abre estos enlaces para encontrar publicaciones que importar.",
+    en: "Open these links to find posts to import.",
+  },
+  openLink: { es: "Abrir", en: "Open" },
+
+  // Social stats
+  socialStats: { es: "Estadísticas de importación", en: "Import statistics" },
+  totalImported: { es: "Total importado", en: "Total imported" },
+  pendingVerification: { es: "Pendientes", en: "Pending" },
+  beingVerified: { es: "En verificación", en: "Being verified" },
+  verifiedCount: { es: "Verificados", en: "Verified" },
+  discardedCount: { es: "Descartados", en: "Discarded" },
+  byPlatform: { es: "Por plataforma", en: "By platform" },
+
+  // Coordinator name
+  coordinatorName: { es: "Tu nombre (coordinador)", en: "Your name (coordinator)" },
+  coordinatorPrompt: {
+    es: "Ingresa tu nombre para registrar quién revisa las importaciones.",
+    en: "Enter your name to record who reviews imports.",
+  },
+  continueBtn: { es: "Continuar", en: "Continue" },
+  emptyParse: {
+    es: "Pega el texto de una publicación para analizarla.",
+    en: "Paste a post's text to analyze it.",
+  },
+  linkedToRecord: { es: "Guardado como registro", en: "Saved as record" },
 }
 
 interface I18nValue {
