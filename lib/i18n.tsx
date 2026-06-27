@@ -8,7 +8,7 @@ type Dict = Record<string, { es: string; en: string }>
 
 // All UI copy lives here so the app is fully bilingual. Spanish is the default.
 const DICT: Dict = {
-  appName: { es: "RescateVE", en: "RescateVE" },
+  appName: { es: "RescateVzla", en: "RescateVzla" },
   appTagline: {
     es: "Coordinación de rescate — Terremoto de Venezuela",
     en: "Rescue coordination — Venezuela Earthquake",
