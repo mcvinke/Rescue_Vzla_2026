@@ -1,0 +1,182 @@
+export type Severity = "collapsed" | "severe" | "partial" | "stable"
+
+export type BuildingStatus = "searching" | "pending" | "cleared"
+
+/**
+ * Affected cities/regions covered by the map. `center` is used to focus the map
+ * and as the default location when reporting a new building in that city.
+ * City names are proper nouns, identical in Spanish and English.
+ */
+export interface City {
+  id: string
+  name: string
+  center: [number, number]
+}
+
+export const CITIES: City[] = [
+  { id: "la-guaira", name: "La Guaira (Vargas)", center: [10.603, -66.93] },
+  { id: "caracas", name: "Caracas", center: [10.4806, -66.9036] },
+  { id: "los-teques", name: "Los Teques (Miranda)", center: [10.3417, -67.0418] },
+]
+
+export function cityName(id: string): string {
+  return CITIES.find((c) => c.id === id)?.name ?? id
+}
+
+export type VictimStatus = "missing" | "trapped" | "rescued" | "deceased"
+
+export type SignalKind = "voice" | "knock" | "noise" | "movement"
+
+export interface SignsOfLife {
+  kind: SignalKind
+  detectedAt: number
+  notes: string
+  reportedBy: string
+}
+
+export interface Victim {
+  id: string
+  name: string
+  /**
+   * Venezuelan national ID (cédula), e.g. "V-12345678" or "E-12345678".
+   * Required for new reports via the form; may be empty ("desconocida") when
+   * the reporter genuinely does not know it, so life-critical reports aren't blocked.
+   */
+  cedula: string
+  /** Last known floor number within the building */
+  floor: number | null
+  /** Last known apartment / unit identifier */
+  apartment: string
+  status: VictimStatus
+  contactName: string
+  contactPhone: string
+  notes: string
+  /** Most recent confirmed signs-of-life report, or null if none yet. */
+  signsOfLife: SignsOfLife | null
+}
+
+export interface Building {
+  id: string
+  name: string
+  address: string
+  /** True when any victim or the building itself has confirmed signs of life. */
+  signsOfLife: boolean
+  /** Timestamp (ms) of the most recent signs-of-life report for this building. */
+  signsOfLifeAt: number | null
+  /** City/region id from CITIES, e.g. "la-guaira" | "caracas" | "los-teques". */
+  city: string
+  /** True for the labeled placeholder records, false/undefined for real reports. */
+  isSample?: boolean
+  lat: number
+  lng: number
+  floors: number
+  apartments: number
+  severity: Severity
+  status: BuildingStatus
+  /** Notes about access, emergency exits, stairs, etc. */
+  accessNotes: string
+  reportedBy: string
+  source: string
+  victims: Victim[]
+  createdAt: number
+  updatedAt: number
+}
+
+/** Building document as stored in Firestore: metadata only, no embedded people. */
+export type BuildingDoc = Omit<Building, "victims">
+
+/**
+ * A missing person as stored in its own top-level `missingPersons` document.
+ * Keeping each person in its own doc means two rescuers can update different
+ * people at the same time without overwriting each other, and we can query
+ * across every building (e.g. "everyone still trapped", or search by name).
+ */
+export interface MissingPersonDoc extends Victim {
+  /** Foreign key back to the building this person was last seen in. */
+  buildingId: string
+  /** Lowercased name, stored so we can do case-insensitive prefix search. */
+  nameLower: string
+  createdAt: number
+  updatedAt: number
+}
+
+// ---------------------------------------------------------------------------
+// Social media monitoring & import
+// ---------------------------------------------------------------------------
+
+/** Platforms coordinators import posts from. `id` is stored; `label` is shown. */
+export const IMPORT_PLATFORMS = [
+  "twitter",
+  "instagram",
+  "tiktok",
+  "telegram",
+  "whatsapp",
+  "facebook",
+  "news",
+  "other",
+] as const
+export type ImportPlatform = (typeof IMPORT_PLATFORMS)[number]
+
+export type SignalType = "missing_person" | "building" | "unclear"
+export type ImportStatus = "pending" | "verifying" | "verified" | "discarded"
+
+/**
+ * Raw log of a social-media post a coordinator pasted in, plus the fields the
+ * auto-parser extracted. Always unverified until a coordinator reviews it.
+ * Stored in its own top-level `socialImports` collection.
+ */
+export interface SocialImport {
+  id: string
+  /** The full original post text, kept verbatim for verification. */
+  originalText: string
+  platform: ImportPlatform
+  sourceUrl: string
+  /** Date of the post (ms epoch), defaults to import time. */
+  postedAt: number
+  parsedName: string
+  parsedLocation: string
+  parsedPhone: string
+  /** Building or address reference extracted from the post. */
+  parsedBuilding: string
+  signalType: SignalType
+  /** Always "unverified" until a coordinator verifies this import. */
+  verificationStatus: "unverified" | "verified"
+  status: ImportStatus
+  /** Id of the missingPersons / buildings doc created when verified, if any. */
+  linkedRecordId: string
+  createdAt: number
+  reviewedAt: number | null
+  reviewedBy: string
+  /** True for injected demo records, false for real imports. */
+  isSample: boolean
+}
+
+export type NewSocialImport = Omit<SocialImport, "id" | "createdAt" | "reviewedAt" | "linkedRecordId" | "verificationStatus" | "isSample">
+
+export const SEVERITY_ORDER: Record<Severity, number> = {
+  collapsed: 4,
+  severe: 3,
+  partial: 2,
+  stable: 1,
+}
+
+export function activeVictims(b: Building): Victim[] {
+  return b.victims.filter((v) => v.status === "missing" || v.status === "trapped")
+}
+
+/**
+ * Higher score = higher rescue priority.
+ * Weighted by number of people still missing/trapped and structural severity.
+ */
+export function priorityScore(b: Building): number {
+  const active = activeVictims(b).length
+  return active * 10 + SEVERITY_ORDER[b.severity] * 3 + (b.status === "searching" ? 2 : 0)
+}
+
+export function priorityLevel(b: Building): "critical" | "high" | "moderate" | "low" {
+  const score = priorityScore(b)
+  if (score >= 25) return "critical"
+  if (score >= 15) return "high"
+  if (score >= 8) return "moderate"
+  return "low"
+}
