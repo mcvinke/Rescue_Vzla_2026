@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet"
+import "leaflet/dist/leaflet.css"
 import type { Building } from "@/lib/types"
 import { buildingIcon } from "./map-icons"
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Activity, Building2, HeartPulse, Users } from "lucide-react"
 import { useI18n } from "@/lib/i18n"
 import type { Building } from "@/lib/types"
@@ -15,6 +15,8 @@ function timeAgo(ts: number, lang: "es" | "en") {
 
 export function StatsHeader({ buildings, live }: { buildings: Building[]; live: boolean }) {
   const { t, lang } = useI18n()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   const stats = useMemo(() => {
     let collapsed = 0
@@ -65,7 +67,7 @@ export function StatsHeader({ buildings, live }: { buildings: Building[]; live: 
             />
             {live ? t("liveData") : t("localData")}
           </span>
-          {stats.lastUpdated > 0 && (
+          {mounted && stats.lastUpdated > 0 && (
             <span className="hidden text-xs text-muted-foreground sm:inline">
               {t("lastUpdated")}: {timeAgo(stats.lastUpdated, lang)}
             </span>
