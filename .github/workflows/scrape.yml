@@ -1,0 +1,13 @@
+name: Scrape Data
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call scrape endpoint
+        run: curl -X GET https://crisis-mapping-app.vercel.app/api/scrape
