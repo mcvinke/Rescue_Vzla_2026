@@ -27,6 +27,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v1",
+        cedula: "V-14582931",
         name: "Ana Rodríguez",
         floor: 8,
         apartment: "8-B",
@@ -37,6 +38,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
       },
       {
         id: "v2",
+        cedula: "",
         name: "Sofía Rodríguez",
         floor: 8,
         apartment: "8-B",
@@ -47,6 +49,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
       },
       {
         id: "v3",
+        cedula: "V-6789145",
         name: "Carlos Mendoza",
         floor: 4,
         apartment: "4-A",
@@ -75,6 +78,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v4",
+        cedula: "V-25671903",
         name: "José Pérez",
         floor: 6,
         apartment: "6-C",
@@ -85,6 +89,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
       },
       {
         id: "v5",
+        cedula: "",
         name: "Familia Gutiérrez (3)",
         floor: 7,
         apartment: "7-A",
@@ -113,6 +118,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v6",
+        cedula: "V-11203455",
         name: "Pedro Salas",
         floor: 3,
         apartment: "3-D",
@@ -141,6 +147,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v7",
+        cedula: "V-30558712",
         name: "Daniela Ríos",
         floor: 9,
         apartment: "9-A",
@@ -151,6 +158,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
       },
       {
         id: "v8",
+        cedula: "V-3912487",
         name: "Sr. Hernández",
         floor: 2,
         apartment: "2-B",
@@ -196,6 +204,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v9",
+        cedula: "V-27890341",
         name: "Valentina Castro",
         floor: 11,
         apartment: "11-C",
@@ -206,6 +215,7 @@ const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
       },
       {
         id: "v10",
+        cedula: "V-18456220",
         name: "Miguel Ángel Torres",
         floor: 1,
         apartment: "PB-2",
@@ -239,6 +249,7 @@ const CARACAS_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v11",
+        cedula: "V-5238901",
         name: "Yolanda Bastidas",
         floor: 5,
         apartment: "5-2",
@@ -249,6 +260,7 @@ const CARACAS_BUILDINGS: RawBuilding[] = [
       },
       {
         id: "v12",
+        cedula: "",
         name: "Familia Colmenares (4)",
         floor: 3,
         apartment: "3-1",
@@ -277,6 +289,7 @@ const CARACAS_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v13",
+        cedula: "V-4019256",
         name: "Régulo Antonio Páez",
         floor: 9,
         apartment: "9-D",
@@ -343,6 +356,7 @@ const LOS_TEQUES_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v14",
+        cedula: "V-22784510",
         name: "Carolina Méndez",
         floor: 6,
         apartment: "6-A",
@@ -371,6 +385,7 @@ const LOS_TEQUES_BUILDINGS: RawBuilding[] = [
     victims: [
       {
         id: "v15",
+        cedula: "V-7653108",
         name: "Sr. Aular",
         floor: 2,
         apartment: "2-C",

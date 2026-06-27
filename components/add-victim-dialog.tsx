@@ -32,6 +32,9 @@ export function AddVictimDialog({
   const { addVictim } = useRescueStore()
 
   const [name, setName] = useState("")
+  const [nationality, setNationality] = useState<"V" | "E">("V")
+  const [cedulaNum, setCedulaNum] = useState("")
+  const [cedulaUnknown, setCedulaUnknown] = useState(false)
   const [floor, setFloor] = useState("")
   const [apartment, setApartment] = useState("")
   const [status, setStatus] = useState<VictimStatus>("missing")
@@ -42,6 +45,9 @@ export function AddVictimDialog({
 
   function reset() {
     setName("")
+    setNationality("V")
+    setCedulaNum("")
+    setCedulaUnknown(false)
     setFloor("")
     setApartment("")
     setStatus("missing")
@@ -50,13 +56,18 @@ export function AddVictimDialog({
     setNotes("")
   }
 
+  const digits = cedulaNum.replace(/\D/g, "")
+  const cedulaValid = cedulaUnknown || digits.length >= 6
+  const canSubmit = !!buildingId && !!name.trim() && cedulaValid && !saving
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!buildingId || !name.trim()) return
+    if (!buildingId || !name.trim() || !cedulaValid) return
     setSaving(true)
     try {
       await addVictim(buildingId, {
         name: name.trim(),
+        cedula: cedulaUnknown ? "" : `${nationality}-${digits}`,
         floor: floor === "" ? null : Number(floor),
         apartment: apartment.trim(),
         status,
@@ -85,6 +96,45 @@ export function AddVictimDialog({
               {t("name")} <span className="text-destructive">*</span>
             </Label>
             <Input id="v-name" value={name} onChange={(e) => setName(e.target.value)} required />
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label htmlFor="v-cedula">
+              {t("cedula")} {!cedulaUnknown && <span className="text-destructive">*</span>}
+            </Label>
+            <div className="flex gap-2">
+              <select
+                aria-label={t("cedula")}
+                className={`${selectClass} w-16 shrink-0 disabled:opacity-50`}
+                value={nationality}
+                onChange={(e) => setNationality(e.target.value as "V" | "E")}
+                disabled={cedulaUnknown}
+              >
+                <option value="V">V</option>
+                <option value="E">E</option>
+              </select>
+              <Input
+                id="v-cedula"
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder={t("cedulaPlaceholder")}
+                value={cedulaNum}
+                onChange={(e) => setCedulaNum(e.target.value.replace(/\D/g, ""))}
+                disabled={cedulaUnknown}
+                required={!cedulaUnknown}
+                className="flex-1"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                className="size-3.5 accent-primary"
+                checked={cedulaUnknown}
+                onChange={(e) => setCedulaUnknown(e.target.checked)}
+              />
+              {t("cedulaUnknown")}
+            </label>
+            {!cedulaUnknown && <p className="text-[11px] text-muted-foreground">{t("cedulaHint")}</p>}
           </div>
 
           <div className="grid grid-cols-3 gap-3">
@@ -143,7 +193,7 @@ export function AddVictimDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
-            <Button type="submit" disabled={!name.trim() || saving}>
+            <Button type="submit" disabled={!canSubmit}>
               {saving ? t("saving") : t("save")}
             </Button>
           </div>

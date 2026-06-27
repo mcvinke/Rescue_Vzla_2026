@@ -43,7 +43,9 @@ export function RescueDashboard() {
       .filter((b) => {
         if (!q) return true
         const inBuilding = `${b.name} ${b.address}`.toLowerCase().includes(q)
-        const inVictims = b.victims.some((v) => v.name.toLowerCase().includes(q))
+        const inVictims = b.victims.some(
+          (v) => v.name.toLowerCase().includes(q) || v.cedula.toLowerCase().includes(q),
+        )
         return inBuilding || inVictims
       })
       .sort((a, b) => priorityScore(b) - priorityScore(a))

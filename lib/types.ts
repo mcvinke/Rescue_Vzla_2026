@@ -28,6 +28,12 @@ export type VictimStatus = "missing" | "trapped" | "rescued" | "deceased"
 export interface Victim {
   id: string
   name: string
+  /**
+   * Venezuelan national ID (cédula), e.g. "V-12345678" or "E-12345678".
+   * Required for new reports via the form; may be empty ("desconocida") when
+   * the reporter genuinely does not know it, so life-critical reports aren't blocked.
+   */
+  cedula: string
   /** Last known floor number within the building */
   floor: number | null
   /** Last known apartment / unit identifier */
