@@ -57,45 +57,47 @@
 }
 
 :root {
-  color-scheme: dark;
-  --background: oklch(0.17 0.012 260);
-  --foreground: oklch(0.97 0.005 250);
-  --card: oklch(0.215 0.013 260);
-  --card-foreground: oklch(0.97 0.005 250);
-  --popover: oklch(0.215 0.013 260);
-  --popover-foreground: oklch(0.97 0.005 250);
-  --primary: oklch(0.8 0.15 78);
-  --primary-foreground: oklch(0.2 0.02 70);
-  --secondary: oklch(0.27 0.014 260);
-  --secondary-foreground: oklch(0.97 0.005 250);
-  --muted: oklch(0.27 0.014 260);
-  --muted-foreground: oklch(0.7 0.012 258);
-  --accent: oklch(0.3 0.015 260);
-  --accent-foreground: oklch(0.97 0.005 250);
-  --destructive: oklch(0.62 0.22 26);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.8 0.15 78);
+  color-scheme: light;
+  /* High-contrast light theme for bright outdoor / low-end Android use */
+  --background: #ffffff;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: #1a56db; /* deep blue: trust, official actions */
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #eff4ff; /* tint of primary blue */
+  --accent-foreground: #1a56db;
+  --destructive: #e02424;
+  --border: #e5e7eb;
+  --input: #d1d5db;
+  --ring: #1a56db;
 
-  --sev-collapsed: oklch(0.62 0.22 26);
-  --sev-severe: oklch(0.7 0.17 50);
-  --sev-partial: oklch(0.82 0.15 85);
-  --sev-stable: oklch(0.72 0.16 155);
+  /* Status colors (always paired with an icon, never color alone) */
+  --sev-collapsed: #e02424; /* collapsed / critical */
+  --sev-severe: #dd6b20; /* severe / trapped */
+  --sev-partial: #c27803; /* partial / unverified */
+  --sev-stable: #057a55; /* stable / cleared / safe */
 
-  --chart-1: oklch(0.62 0.22 26);
-  --chart-2: oklch(0.7 0.17 50);
-  --chart-3: oklch(0.82 0.15 85);
-  --chart-4: oklch(0.72 0.16 155);
-  --chart-5: oklch(0.7 0.012 258);
+  --chart-1: #e02424;
+  --chart-2: #dd6b20;
+  --chart-3: #c27803;
+  --chart-4: #057a55;
+  --chart-5: #6b7280;
   --radius: 0.625rem;
-  --sidebar: oklch(0.2 0.013 260);
-  --sidebar-foreground: oklch(0.97 0.005 250);
-  --sidebar-primary: oklch(0.8 0.15 78);
-  --sidebar-primary-foreground: oklch(0.2 0.02 70);
-  --sidebar-accent: oklch(0.3 0.015 260);
-  --sidebar-accent-foreground: oklch(0.97 0.005 250);
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.8 0.15 78);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #1a56db;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eff4ff;
+  --sidebar-accent-foreground: #1a56db;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #1a56db;
 }
 
 @layer base {
@@ -110,9 +112,9 @@
   }
 }
 
-/* Leaflet tuning for the dark UI */
+/* Leaflet tuning for the light UI */
 .leaflet-container {
-  background: oklch(0.17 0.012 260);
+  background: #e8eaed;
   font-family: var(--font-sans);
 }
 .leaflet-bar a,
