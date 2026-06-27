@@ -10,8 +10,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'RescateVE — Coordinación de rescate',
+  description:
+    'Mapa de coordinación de rescate para el terremoto de Venezuela: edificios afectados, personas desaparecidas y recursos. Rescue coordination map for the Venezuela earthquake.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -33,11 +34,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  colorScheme: 'dark',
+  themeColor: '#1c1f26',
 }
 
 export default function RootLayout({
