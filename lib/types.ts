@@ -36,6 +36,24 @@ export interface Building {
   updatedAt: number
 }
 
+/** Building document as stored in Firestore: metadata only, no embedded people. */
+export type BuildingDoc = Omit<Building, "victims">
+
+/**
+ * A missing person as stored in its own top-level `missingPersons` document.
+ * Keeping each person in its own doc means two rescuers can update different
+ * people at the same time without overwriting each other, and we can query
+ * across every building (e.g. "everyone still trapped", or search by name).
+ */
+export interface MissingPersonDoc extends Victim {
+  /** Foreign key back to the building this person was last seen in. */
+  buildingId: string
+  /** Lowercased name, stored so we can do case-insensitive prefix search. */
+  nameLower: string
+  createdAt: number
+  updatedAt: number
+}
+
 export const SEVERITY_ORDER: Record<Severity, number> = {
   collapsed: 4,
   severe: 3,

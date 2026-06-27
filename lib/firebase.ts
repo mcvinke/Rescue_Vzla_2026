@@ -1,5 +1,10 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app"
-import { getFirestore, type Firestore } from "firebase/firestore"
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  type Firestore,
+} from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -21,7 +26,22 @@ let firestore: Firestore | null = null
 
 if (isFirebaseConfigured) {
   app = getApps().length ? getApp() : initializeApp(firebaseConfig)
-  firestore = getFirestore(app)
+
+  // Offline-first: cache the database on-device with IndexedDB. Reads work with
+  // no signal, and writes are queued locally and replayed automatically when
+  // connectivity returns. persistentMultipleTabManager keeps multiple open tabs
+  // (or PWA windows) consistent. Falls back gracefully if storage is blocked.
+  try {
+    firestore = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    })
+  } catch {
+    // Private mode / unsupported storage: fall back to the default in-memory cache.
+    const { getFirestore } = require("firebase/firestore")
+    firestore = getFirestore(app)
+  }
 }
 
 export const db = firestore

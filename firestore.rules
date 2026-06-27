@@ -1,0 +1,66 @@
+rules_version = '2';
+
+// Firestore Security Rules for the rescue-coordination database.
+//
+// Deploy with: firebase deploy --only firestore:rules
+// (or paste into Firebase Console > Firestore Database > Rules)
+//
+// CONTEXT: Right now the app has no login (auth is a later milestone), so these
+// rules allow open reads and validated writes. This keeps the database usable by
+// any rescuer with the app while still rejecting malformed or destructive data.
+// When authentication is added, tighten the `allow` conditions to
+// `request.auth != null` and gate deletes/role-sensitive fields by custom claims.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Shared validation helpers ----
+    function isString(v)   { return v is string; }
+    function isNumber(v)   { return v is number; }
+    function nonEmpty(v)   { return v is string && v.size() > 0 && v.size() <= 280; }
+
+    function validSeverity(v) {
+      return v in ['collapsed', 'severe', 'partial', 'stable'];
+    }
+    function validBuildingStatus(v) {
+      return v in ['searching', 'pending', 'cleared'];
+    }
+    function validVictimStatus(v) {
+      return v in ['missing', 'trapped', 'rescued', 'deceased'];
+    }
+
+    // ---- Buildings: site metadata ----
+    match /buildings/{buildingId} {
+      allow read: if true;
+
+      allow create, update: if
+        nonEmpty(request.resource.data.name) &&
+        isString(request.resource.data.address) &&
+        isNumber(request.resource.data.lat) &&
+        isNumber(request.resource.data.lng) &&
+        request.resource.data.lat >= -90 && request.resource.data.lat <= 90 &&
+        request.resource.data.lng >= -180 && request.resource.data.lng <= 180 &&
+        validSeverity(request.resource.data.severity) &&
+        validBuildingStatus(request.resource.data.status) &&
+        isNumber(request.resource.data.updatedAt);
+
+      // Never allow client-side deletes: rescue history must not be erasable.
+      allow delete: if false;
+    }
+
+    // ---- Missing persons: one document per person ----
+    match /missingPersons/{personId} {
+      allow read: if true;
+
+      allow create, update: if
+        nonEmpty(request.resource.data.name) &&
+        nonEmpty(request.resource.data.buildingId) &&
+        validVictimStatus(request.resource.data.status) &&
+        isNumber(request.resource.data.updatedAt);
+
+      // People records are never deleted (only their status changes, e.g. to
+      // "rescued"). This preserves an audit trail for accountability.
+      allow delete: if false;
+    }
+  }
+}
