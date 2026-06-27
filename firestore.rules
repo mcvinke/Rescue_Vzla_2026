@@ -36,6 +36,7 @@ service cloud.firestore {
       allow create, update: if
         nonEmpty(request.resource.data.name) &&
         isString(request.resource.data.address) &&
+        nonEmpty(request.resource.data.city) &&
         isNumber(request.resource.data.lat) &&
         isNumber(request.resource.data.lng) &&
         request.resource.data.lat >= -90 && request.resource.data.lat <= 90 &&

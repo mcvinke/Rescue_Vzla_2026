@@ -2,6 +2,27 @@ export type Severity = "collapsed" | "severe" | "partial" | "stable"
 
 export type BuildingStatus = "searching" | "pending" | "cleared"
 
+/**
+ * Affected cities/regions covered by the map. `center` is used to focus the map
+ * and as the default location when reporting a new building in that city.
+ * City names are proper nouns, identical in Spanish and English.
+ */
+export interface City {
+  id: string
+  name: string
+  center: [number, number]
+}
+
+export const CITIES: City[] = [
+  { id: "la-guaira", name: "La Guaira (Vargas)", center: [10.603, -66.93] },
+  { id: "caracas", name: "Caracas", center: [10.4806, -66.9036] },
+  { id: "los-teques", name: "Los Teques (Miranda)", center: [10.3417, -67.0418] },
+]
+
+export function cityName(id: string): string {
+  return CITIES.find((c) => c.id === id)?.name ?? id
+}
+
 export type VictimStatus = "missing" | "trapped" | "rescued" | "deceased"
 
 export interface Victim {
@@ -21,6 +42,10 @@ export interface Building {
   id: string
   name: string
   address: string
+  /** City/region id from CITIES, e.g. "la-guaira" | "caracas" | "los-teques". */
+  city: string
+  /** True for the labeled placeholder records, false/undefined for real reports. */
+  isSample?: boolean
   lat: number
   lng: number
   floors: number

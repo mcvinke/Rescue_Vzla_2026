@@ -3,7 +3,7 @@
 import { Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useI18n } from "@/lib/i18n"
-import { activeVictims, priorityLevel, type Building } from "@/lib/types"
+import { activeVictims, cityName, priorityLevel, type Building } from "@/lib/types"
 import { PRIORITY_BADGE, SEVERITY_TOKEN, STATUS_DOT } from "@/lib/severity-style"
 import { cn } from "@/lib/utils"
 
@@ -48,7 +48,14 @@ export function PriorityList({
                   <span className="truncate text-sm font-medium">{b.name}</span>
                   <Badge className={cn("shrink-0 border-0", PRIORITY_BADGE[level])}>{t(level)}</Badge>
                 </span>
-                <span className="mt-0.5 block truncate text-xs text-muted-foreground">{b.address}</span>
+                <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="truncate">{cityName(b.city)}</span>
+                  {b.isSample && (
+                    <span className="shrink-0 rounded border border-dashed border-border px-1 text-[10px] leading-tight">
+                      {t("sampleData")}
+                    </span>
+                  )}
+                </span>
                 <span className="mt-1.5 flex items-center gap-3 text-xs">
                   <span
                     className={cn(

@@ -32,6 +32,15 @@ const DICT: Dict = {
   reportBuilding: { es: "Reportar edificio", en: "Report building" },
   filterAll: { es: "Todos", en: "All" },
 
+  // Cities
+  city: { es: "Ciudad", en: "City" },
+  allCities: { es: "Todas las ciudades", en: "All cities" },
+  sampleData: { es: "Ejemplo", en: "Sample" },
+  sampleNotice: {
+    es: "Datos de ejemplo — reemplázalos con reportes reales.",
+    en: "Sample data — replace with real reports.",
+  },
+
   // Priority
   priority: { es: "Prioridad", en: "Priority" },
   critical: { es: "Crítica", en: "Critical" },

@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { useI18n } from "@/lib/i18n"
 import { useRescueStore } from "@/lib/rescue-store"
-import { activeVictims, priorityLevel, type Building, type VictimStatus } from "@/lib/types"
+import { activeVictims, cityName, priorityLevel, type Building, type VictimStatus } from "@/lib/types"
 import { PRIORITY_BADGE, SEVERITY_BADGE, VICTIM_BADGE } from "@/lib/severity-style"
 import { cn } from "@/lib/utils"
 
@@ -39,13 +39,18 @@ export function BuildingDetail({
             <Badge className={cn("border-0", SEVERITY_BADGE[building.severity])}>
               {t(`sev_${building.severity}`)}
             </Badge>
+            {building.isSample && (
+              <Badge variant="outline" className="border-dashed text-muted-foreground">
+                {t("sampleData")}
+              </Badge>
+            )}
           </div>
           <h2 className="font-heading text-base leading-tight font-semibold text-balance">
             {building.name}
           </h2>
           <p className="mt-0.5 flex items-start gap-1 text-xs text-muted-foreground">
             <MapPin className="mt-0.5 size-3 shrink-0" aria-hidden />
-            {building.address}
+            {building.address} · {cityName(building.city)}
           </p>
         </div>
         <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("closePanel")}>

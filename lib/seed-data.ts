@@ -1,10 +1,13 @@
 import type { Building } from "./types"
 
-// Approximate real coordinates along the La Guaira / Vargas coast, Venezuela.
-// This sample data illustrates the rescue picture before live reports arrive.
+// Approximate real coordinates across the affected cities, Venezuela.
+// This is clearly-labeled SAMPLE data that illustrates the rescue picture
+// before live reports arrive — every record carries isSample: true.
 const now = Date.now()
 
-export const SEED_BUILDINGS: Building[] = [
+type RawBuilding = Omit<Building, "city" | "isSample">
+
+const LA_GUAIRA_BUILDINGS: RawBuilding[] = [
   {
     id: "edif-marina",
     name: "Residencias Marina Mar",
@@ -213,4 +216,180 @@ export const SEED_BUILDINGS: Building[] = [
       },
     ],
   },
+]
+
+// Caracas — coordinates across Petare, Catia, El Valle and Chacao parishes.
+const CARACAS_BUILDINGS: RawBuilding[] = [
+  {
+    id: "ccs-petare",
+    name: "Bloque 7, Barrio José Félix Ribas",
+    address: "Petare, Sucre, Caracas",
+    lat: 10.4889,
+    lng: -66.8167,
+    floors: 6,
+    apartments: 30,
+    severity: "collapsed",
+    status: "searching",
+    accessNotes:
+      "Acceso vehicular imposible por callejones estrechos. Solo a pie. Estructura inestable, riesgo de derrumbe secundario.",
+    reportedBy: "Brigada comunitaria Petare",
+    source: "WhatsApp",
+    createdAt: now - 1000 * 60 * 60 * 5,
+    updatedAt: now - 1000 * 60 * 25,
+    victims: [
+      {
+        id: "v11",
+        name: "Yolanda Bastidas",
+        floor: 5,
+        apartment: "5-2",
+        status: "trapped",
+        contactName: "Hija (Génesis)",
+        contactPhone: "+58 414 555 0301",
+        notes: "Se escuchan golpes desde el apartamento.",
+      },
+      {
+        id: "v12",
+        name: "Familia Colmenares (4)",
+        floor: 3,
+        apartment: "3-1",
+        status: "missing",
+        contactName: "Vecina",
+        contactPhone: "+58 412 555 0318",
+        notes: "Dos adultos, dos niños.",
+      },
+    ],
+  },
+  {
+    id: "ccs-catia",
+    name: "Residencias Sucre",
+    address: "Av. Sucre, Catia, Libertador, Caracas",
+    lat: 10.5114,
+    lng: -66.9289,
+    floors: 11,
+    apartments: 44,
+    severity: "severe",
+    status: "searching",
+    accessNotes: "Grietas en columnas de planta baja. Ascensores fuera de servicio. Escalera norte transitable.",
+    reportedBy: "Bomberos del Distrito Capital",
+    source: "Reporte directo",
+    createdAt: now - 1000 * 60 * 60 * 4,
+    updatedAt: now - 1000 * 60 * 50,
+    victims: [
+      {
+        id: "v13",
+        name: "Régulo Antonio Páez",
+        floor: 9,
+        apartment: "9-D",
+        status: "missing",
+        contactName: "Hijo",
+        contactPhone: "+58 424 555 0327",
+        notes: "Adulto mayor, usa bastón.",
+      },
+    ],
+  },
+  {
+    id: "ccs-elvalle",
+    name: "Unidad Residencial El Valle",
+    address: "Av. Intercomunal, El Valle, Caracas",
+    lat: 10.4583,
+    lng: -66.9,
+    floors: 15,
+    apartments: 60,
+    severity: "partial",
+    status: "pending",
+    accessNotes: "Daño en fachada y vidrios. Edificio evacuado preventivamente, pendiente inspección estructural.",
+    reportedBy: "Junta de condominio",
+    source: "Telegram",
+    createdAt: now - 1000 * 60 * 60 * 3,
+    updatedAt: now - 1000 * 60 * 60 * 2,
+    victims: [],
+  },
+  {
+    id: "ccs-chacao",
+    name: "Edificio Chacao Centro",
+    address: "Av. Francisco de Miranda, Chacao, Caracas",
+    lat: 10.4978,
+    lng: -66.8536,
+    floors: 9,
+    apartments: 27,
+    severity: "stable",
+    status: "cleared",
+    accessNotes: "Inspeccionado por ingenieros del municipio. Sin daño estructural. Residentes pueden regresar.",
+    reportedBy: "Protección Civil Chacao",
+    source: "Reporte directo",
+    createdAt: now - 1000 * 60 * 60 * 6,
+    updatedAt: now - 1000 * 60 * 80,
+    victims: [],
+  },
+]
+
+// Los Teques — Miranda, southwest of Caracas.
+const LOS_TEQUES_BUILDINGS: RawBuilding[] = [
+  {
+    id: "lt-centro",
+    name: "Residencias El Tambor",
+    address: "Sector El Tambor, Los Teques, Miranda",
+    lat: 10.3447,
+    lng: -67.0436,
+    floors: 7,
+    apartments: 28,
+    severity: "severe",
+    status: "searching",
+    accessNotes: "Escombros en entrada principal. Acceso por estacionamiento posterior.",
+    reportedBy: "Protección Civil Miranda",
+    source: "WhatsApp",
+    createdAt: now - 1000 * 60 * 60 * 4,
+    updatedAt: now - 1000 * 60 * 35,
+    victims: [
+      {
+        id: "v14",
+        name: "Carolina Méndez",
+        floor: 6,
+        apartment: "6-A",
+        status: "trapped",
+        contactName: "Esposo",
+        contactPhone: "+58 416 555 0344",
+        notes: "Contacto telefónico intermitente.",
+      },
+    ],
+  },
+  {
+    id: "lt-vista",
+    name: "Conjunto Lomas de Urquía",
+    address: "Carretera Panamericana, Los Teques, Miranda",
+    lat: 10.3669,
+    lng: -67.0561,
+    floors: 5,
+    apartments: 18,
+    severity: "partial",
+    status: "pending",
+    accessNotes: "Daño moderado en muros divisorios. Estructura principal en pie.",
+    reportedBy: "Vecinos del conjunto",
+    source: "Instagram",
+    createdAt: now - 1000 * 60 * 60 * 3,
+    updatedAt: now - 1000 * 60 * 95,
+    victims: [
+      {
+        id: "v15",
+        name: "Sr. Aular",
+        floor: 2,
+        apartment: "2-C",
+        status: "missing",
+        contactName: "Nuera",
+        contactPhone: "+58 412 555 0351",
+        notes: "",
+      },
+    ],
+  },
+]
+
+function withCity(list: RawBuilding[], city: string): Building[] {
+  return list.map((b) => ({ ...b, city, isSample: true }))
+}
+
+// All sample buildings, tagged with their city and clearly marked as samples.
+export const SEED_BUILDINGS: Building[] = [
+  ...withCity(LA_GUAIRA_BUILDINGS, "la-guaira"),
+  ...withCity(CARACAS_BUILDINGS, "caracas"),
+  ...withCity(LOS_TEQUES_BUILDINGS, "los-teques"),
 ]

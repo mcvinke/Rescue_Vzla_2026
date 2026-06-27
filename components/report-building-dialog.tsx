@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useI18n } from "@/lib/i18n"
 import { useRescueStore } from "@/lib/rescue-store"
-import type { Severity, BuildingStatus } from "@/lib/types"
+import { CITIES, type Severity, type BuildingStatus } from "@/lib/types"
 
 const LocationPicker = dynamic(() => import("./map/location-picker"), { ssr: false })
 
@@ -35,6 +35,7 @@ export function ReportBuildingDialog({
 
   const [name, setName] = useState("")
   const [address, setAddress] = useState("")
+  const [city, setCity] = useState<string>(CITIES[0].id)
   const [floors, setFloors] = useState("")
   const [apartments, setApartments] = useState("")
   const [severity, setSeverity] = useState<Severity>("severe")
@@ -48,6 +49,7 @@ export function ReportBuildingDialog({
   function reset() {
     setName("")
     setAddress("")
+    setCity(CITIES[0].id)
     setFloors("")
     setApartments("")
     setSeverity("severe")
@@ -68,6 +70,7 @@ export function ReportBuildingDialog({
       await addBuilding({
         name: name.trim(),
         address: address.trim(),
+        city,
         lat: loc.lat,
         lng: loc.lng,
         floors: Number(floors) || 0,
@@ -106,6 +109,24 @@ export function ReportBuildingDialog({
               {t("address")} <span className="text-destructive">*</span>
             </Label>
             <Input id="b-address" value={address} onChange={(e) => setAddress(e.target.value)} required />
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label htmlFor="b-city">
+              {t("city")} <span className="text-destructive">*</span>
+            </Label>
+            <select
+              id="b-city"
+              className={selectClass}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            >
+              {CITIES.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid gap-1.5">

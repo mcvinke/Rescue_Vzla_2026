@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useI18n } from "@/lib/i18n"
 import { useRescueStore } from "@/lib/rescue-store"
-import { priorityScore, type Building, type Severity } from "@/lib/types"
+import { CITIES, priorityScore, type Building, type Severity } from "@/lib/types"
 import { SEVERITY_TOKEN } from "@/lib/severity-style"
 import { cn } from "@/lib/utils"
 import { StatsHeader } from "./stats-header"
@@ -29,6 +29,7 @@ export function RescueDashboard() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [search, setSearch] = useState("")
+  const [city, setCity] = useState<string>("all")
   const [filter, setFilter] = useState<Severity | "all">("all")
   const [mobileView, setMobileView] = useState<"map" | "list">("list")
   const [reportOpen, setReportOpen] = useState(false)
@@ -37,6 +38,7 @@ export function RescueDashboard() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return buildings
+      .filter((b) => (city === "all" ? true : b.city === city))
       .filter((b) => (filter === "all" ? true : b.severity === filter))
       .filter((b) => {
         if (!q) return true
@@ -45,7 +47,7 @@ export function RescueDashboard() {
         return inBuilding || inVictims
       })
       .sort((a, b) => priorityScore(b) - priorityScore(a))
-  }, [buildings, search, filter])
+  }, [buildings, search, city, filter])
 
   const selected: Building | null = useMemo(
     () => buildings.find((b) => b.id === selectedId) ?? null,
@@ -110,6 +112,19 @@ export function RescueDashboard() {
                     aria-label={t("searchPlaceholder")}
                   />
                 </div>
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  aria-label={t("city")}
+                  className="h-9 w-full rounded-lg border border-input bg-input/30 px-2.5 text-sm font-medium outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  <option value="all">{t("allCities")}</option>
+                  {CITIES.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
                 <div className="flex flex-wrap gap-1.5">
                   <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>
                     {t("filterAll")}

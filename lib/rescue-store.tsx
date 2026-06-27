@@ -6,12 +6,18 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react"
 import { db, isFirebaseConfigured } from "./firebase"
 import { SEED_BUILDINGS } from "./seed-data"
 import type { Building, BuildingDoc, MissingPersonDoc, Victim, VictimStatus } from "./types"
+
+// Bump this when the bundled sample data changes (e.g. new cities added) so
+// already-populated databases receive the new samples exactly once per device.
+const SEED_VERSION = "2"
+const SEED_VERSION_KEY = "rescate-seed-version"
 
 type NewBuilding = Omit<Building, "id" | "victims" | "createdAt" | "updatedAt">
 type NewVictim = Omit<Victim, "id">
@@ -71,6 +77,8 @@ export function RescueStoreProvider({ children }: { children: ReactNode }) {
   const [persons, setPersons] = useState<MissingPersonDoc[]>(isFirebaseConfigured ? [] : seed.persons)
   const [loadedBuildings, setLoadedBuildings] = useState<boolean>(!isFirebaseConfigured)
   const [loadedPersons, setLoadedPersons] = useState<boolean>(!isFirebaseConfigured)
+  // Guards the one-time sample top-up so it can't run on every snapshot.
+  const toppedUp = useRef(false)
 
   // Subscribe to live Firestore updates when configured. Two listeners: one for
   // building metadata, one for the missingPersons collection. Both feed the
@@ -86,15 +94,40 @@ export function RescueStoreProvider({ children }: { children: ReactNode }) {
       unsubs.push(
         onSnapshot(query(buildingsRef, orderBy("updatedAt", "desc")), async (snap) => {
           if (snap.empty) {
-            // First run: seed both collections so every team shares a starting picture.
+            // First run on a fresh database: seed both collections fully.
             await Promise.all([
               ...seed.meta.map((m) => setDoc(doc(db, "buildings", m.id), m)),
               ...seed.persons.map((p) => setDoc(doc(db, "missingPersons", p.id), p)),
             ])
+            if (typeof window !== "undefined") localStorage.setItem(SEED_VERSION_KEY, SEED_VERSION)
             return
           }
+
+          const existingIds = new Set(snap.docs.map((d) => d.id))
           setMeta(snap.docs.map((d) => d.data() as BuildingDoc))
           setLoadedBuildings(true)
+
+          // Top-up: database already has data but may predate newly-added sample
+          // cities. Write only the missing sample buildings (and their people),
+          // once per device, so we never resurrect records a team has deleted.
+          if (!toppedUp.current) {
+            toppedUp.current = true
+            const seenVersion =
+              typeof window !== "undefined" ? localStorage.getItem(SEED_VERSION_KEY) : SEED_VERSION
+            if (seenVersion !== SEED_VERSION) {
+              const missing = seed.meta.filter((m) => !existingIds.has(m.id))
+              if (missing.length > 0) {
+                const missingIds = new Set(missing.map((m) => m.id))
+                await Promise.all([
+                  ...missing.map((m) => setDoc(doc(db, "buildings", m.id), m)),
+                  ...seed.persons
+                    .filter((p) => missingIds.has(p.buildingId))
+                    .map((p) => setDoc(doc(db, "missingPersons", p.id), p)),
+                ])
+              }
+              if (typeof window !== "undefined") localStorage.setItem(SEED_VERSION_KEY, SEED_VERSION)
+            }
+          }
         }),
       )
 
