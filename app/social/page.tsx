@@ -3,7 +3,7 @@ import { RescueStoreProvider } from "@/lib/rescue-store"
 import { SocialMonitor } from "@/components/social/social-monitor"
 
 export const metadata = {
-  title: "Social — RescateVE",
+  title: "Social — RescateVzla",
   description: "Monitoreo de redes sociales para coordinadores de rescate",
 }
 

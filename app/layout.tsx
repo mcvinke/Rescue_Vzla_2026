@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'RescateVE — Coordinación de rescate',
+  title: 'RescateVzla — Coordinación de rescate',
   description:
     'Mapa de coordinación de rescate para el terremoto de Venezuela: edificios afectados, personas desaparecidas y recursos. Rescue coordination map for the Venezuela earthquake.',
   generator: 'v0.app',
