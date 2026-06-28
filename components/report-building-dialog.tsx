@@ -98,6 +98,19 @@ export function ReportBuildingDialog({
 
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-1.5">
+            <Label>
+              {t("pickOnMap")} <span className="text-destructive">*</span>
+            </Label>
+            <LocationPicker value={loc} onPick={(lat, lng) => setLoc({ lat, lng })} />
+            <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="size-3" aria-hidden />
+              {loc
+                ? `${t("locationSet")}: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`
+                : t("required")}
+            </p>
+          </div>
+
+          <div className="grid gap-1.5">
             <Label htmlFor="b-name">
               {t("buildingName")} <span className="text-destructive">*</span>
             </Label>
@@ -127,19 +140,6 @@ export function ReportBuildingDialog({
                 </option>
               ))}
             </select>
-          </div>
-
-          <div className="grid gap-1.5">
-            <Label>
-              {t("pickOnMap")} <span className="text-destructive">*</span>
-            </Label>
-            <LocationPicker value={loc} onPick={(lat, lng) => setLoc({ lat, lng })} />
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="size-3" aria-hidden />
-              {loc
-                ? `${t("locationSet")}: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`
-                : t("required")}
-            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
