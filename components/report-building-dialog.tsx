@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import dynamic from "next/dynamic"
-import { MapPin } from "lucide-react"
+import { MapPin, Loader2, CheckCircle2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -18,10 +17,22 @@ import { useI18n } from "@/lib/i18n"
 import { useRescueStore } from "@/lib/rescue-store"
 import { CITIES, type Severity, type BuildingStatus } from "@/lib/types"
 
-const LocationPicker = dynamic(() => import("./map/location-picker"), { ssr: false })
-
 const selectClass =
   "h-9 w-full rounded-lg border border-input bg-input/30 px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+
+async function geocodeAddress(address: string, city: string): Promise<{ lat: number; lng: number } | null> {
+  const cityName = CITIES.find((c) => c.id === city)?.name ?? city
+  const query = `${address}, ${cityName}, Venezuela`
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
+  try {
+    const res = await fetch(url, { headers: { "Accept-Language": "es" } })
+    const results = await res.json()
+    if (results.length === 0) return null
+    return { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) }
+  } catch {
+    return null
+  }
+}
 
 export function ReportBuildingDialog({
   open,
@@ -44,6 +55,8 @@ export function ReportBuildingDialog({
   const [reportedBy, setReportedBy] = useState("")
   const [source, setSource] = useState("WhatsApp")
   const [loc, setLoc] = useState<{ lat: number; lng: number } | null>(null)
+  const [geocoding, setGeocoding] = useState(false)
+  const [geocodeError, setGeocodeError] = useState("")
   const [saving, setSaving] = useState(false)
 
   function reset() {
@@ -58,6 +71,21 @@ export function ReportBuildingDialog({
     setReportedBy("")
     setSource("WhatsApp")
     setLoc(null)
+    setGeocodeError("")
+  }
+
+  async function handleGeocode() {
+    if (!address.trim()) return
+    setGeocoding(true)
+    setGeocodeError("")
+    setLoc(null)
+    const result = await geocodeAddress(address, city)
+    if (result) {
+      setLoc(result)
+    } else {
+      setGeocodeError("No se encontró la dirección. Intenta con más detalles.")
+    }
+    setGeocoding(false)
   }
 
   const valid = name.trim() && address.trim() && loc
@@ -93,35 +121,15 @@ export function ReportBuildingDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{t("reportBuilding")}</DialogTitle>
-          <DialogDescription>{t("pickOnMap")}</DialogDescription>
+          <DialogDescription>Ingresa los datos del edificio afectado</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <div className="grid gap-1.5">
-            <Label>
-              {t("pickOnMap")} <span className="text-destructive">*</span>
-            </Label>
-            <LocationPicker value={loc} onPick={(lat, lng) => setLoc({ lat, lng })} />
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="size-3" aria-hidden />
-              {loc
-                ? `${t("locationSet")}: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`
-                : t("required")}
-            </p>
-          </div>
-
           <div className="grid gap-1.5">
             <Label htmlFor="b-name">
               {t("buildingName")} <span className="text-destructive">*</span>
             </Label>
             <Input id="b-name" value={name} onChange={(e) => setName(e.target.value)} required />
-          </div>
-
-          <div className="grid gap-1.5">
-            <Label htmlFor="b-address">
-              {t("address")} <span className="text-destructive">*</span>
-            </Label>
-            <Input id="b-address" value={address} onChange={(e) => setAddress(e.target.value)} required />
           </div>
 
           <div className="grid gap-1.5">
@@ -132,7 +140,7 @@ export function ReportBuildingDialog({
               id="b-city"
               className={selectClass}
               value={city}
-              onChange={(e) => setCity(e.target.value)}
+              onChange={(e) => { setCity(e.target.value); setLoc(null) }}
             >
               {CITIES.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -140,6 +148,43 @@ export function ReportBuildingDialog({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label htmlFor="b-address">
+              {t("address")} <span className="text-destructive">*</span>
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="b-address"
+                value={address}
+                onChange={(e) => { setAddress(e.target.value); setLoc(null) }}
+                placeholder="Ej: Av. La Playa, Playa Grande"
+                required
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleGeocode}
+                disabled={!address.trim() || geocoding}
+                className="shrink-0"
+              >
+                {geocoding ? <Loader2 className="size-4 animate-spin" /> : <MapPin className="size-4" />}
+              </Button>
+            </div>
+            {loc && (
+              <p className="flex items-center gap-1 text-xs text-green-600">
+                <CheckCircle2 className="size-3" />
+                Ubicación encontrada: {loc.lat.toFixed(4)}, {loc.lng.toFixed(4)}
+              </p>
+            )}
+            {geocodeError && (
+              <p className="text-xs text-destructive">{geocodeError}</p>
+            )}
+            {!loc && !geocodeError && (
+              <p className="text-xs text-muted-foreground">Toca el ícono 📍 para localizar la dirección en el mapa</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -202,6 +247,7 @@ export function ReportBuildingDialog({
               rows={2}
               value={accessNotes}
               onChange={(e) => setAccessNotes(e.target.value)}
+              placeholder="Ej: Escalera bloqueada, acceso por lado norte"
             />
           </div>
 
@@ -223,7 +269,7 @@ export function ReportBuildingDialog({
                 <option>Twitter/X</option>
                 <option>Instagram</option>
                 <option>TikTok</option>
-                <option value="Reporte directo">{t("source")}: directo</option>
+                <option value="Reporte directo">Reporte directo</option>
               </select>
             </div>
           </div>
