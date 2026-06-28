@@ -2,6 +2,55 @@ import { NextResponse } from "next/server"
 import { parsePost } from "@/lib/social-parser"
 import type { ImportPlatform, SignalType } from "@/lib/types"
 
+async function analyzeImageWithGemini(fileId: string, botToken: string): Promise<string> {
+  const geminiKey = process.env.GEMINI_API_KEY
+  if (!geminiKey) return ""
+
+  try {
+    // Get file path from Telegram
+    const fileRes = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`)
+    if (!fileRes.ok) return ""
+    const fileJson = await fileRes.json()
+    const filePath = fileJson?.result?.file_path
+    if (!filePath) return ""
+
+    // Download image from Telegram
+    const imgRes = await fetch(`https://api.telegram.org/file/bot${botToken}/${filePath}`)
+    if (!imgRes.ok) return ""
+    const imgBuffer = await imgRes.arrayBuffer()
+    const base64 = Buffer.from(imgBuffer).toString("base64")
+    const mimeType = filePath.endsWith(".png") ? "image/png" : "image/jpeg"
+
+    // Send to Gemini for analysis
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                text: "Esta imagen fue enviada en el contexto de una operación de rescate en Venezuela tras un terremoto. Extrae TODA la información relevante: nombres de personas desaparecidas o atrapadas, ubicaciones, edificios, pisos, apartamentos, números de teléfono, estado de la situación. Si no hay información de rescate relevante, responde 'sin información relevante'. Responde solo con los datos extraídos, en español."
+              },
+              {
+                inline_data: { mime_type: mimeType, data: base64 }
+              }
+            ]
+          }]
+        }),
+      }
+    )
+    if (!geminiRes.ok) return ""
+    const geminiJson = await geminiRes.json()
+    const extracted = geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ?? ""
+    if (extracted.toLowerCase().includes("sin información relevante")) return ""
+    return extracted
+  } catch {
+    return ""
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -219,11 +268,20 @@ async function scrapeTelegram(offset: number): Promise<{ posts: ScrapedPost[]; n
     const msg = upd.channel_post ?? upd.message
     if (!msg) continue
 
-    const text = msg.text ?? msg.caption ?? ""
-    if (!text && !msg.photo) continue
+    let text = msg.text ?? msg.caption ?? ""
+
+    // If image with no text, use Gemini to extract information
+    if (!text && msg.photo?.length) {
+      const largestPhoto = msg.photo[msg.photo.length - 1]
+      text = await analyzeImageWithGemini(largestPhoto.file_id, token)
+    }
+
+    if (!text) continue
 
     const lower = text.toLowerCase()
-    if (!KEYWORDS_LOWER.some((kw) => lower.includes(kw))) continue
+    // For AI-analyzed images, skip keyword filter — Gemini already validated relevance
+    const isAiAnalyzed = !msg.text && !msg.caption && !!msg.photo?.length
+    if (!isAiAnalyzed && !KEYWORDS_LOWER.some((kw) => lower.includes(kw))) continue
 
     const chat = msg.chat
     // If this is a forwarded message, link back to the original channel
