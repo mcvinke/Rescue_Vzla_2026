@@ -14,9 +14,8 @@ const TWITTER_QUERY =
 
 // Telegram public channel usernames to monitor (bot must be a member/admin).
 const TELEGRAM_CHANNELS = [
-  "@LaGuairaInfo",
-  "@VenezuelaEmergencias",
-  "@SismoVenezuela",
+  "@noticiasvam",
+  "@terremotovenezuela",
 ]
 
 // ---------------------------------------------------------------------------
@@ -188,8 +187,24 @@ async function scrapeTelegram(offset: number): Promise<{ posts: ScrapedPost[]; n
 
   const updates: Array<{
     update_id: number
-    message?: { message_id: number; text?: string; date: number; chat: { id: number; title?: string; username?: string } }
-    channel_post?: { message_id: number; text?: string; date: number; chat: { id: number; title?: string; username?: string } }
+    message?: {
+      message_id: number
+      text?: string
+      caption?: string
+      photo?: Array<{ file_id: string }>
+      date: number
+      chat: { id: number; title?: string; username?: string }
+      forward_from_chat?: { username?: string; id: number }
+      forward_from_message_id?: number
+    }
+    channel_post?: {
+      message_id: number
+      text?: string
+      caption?: string
+      photo?: Array<{ file_id: string }>
+      date: number
+      chat: { id: number; title?: string; username?: string }
+    }
   }> = json.result
 
   const nextOffset = updates.length > 0 ? updates[updates.length - 1].update_id + 1 : offset
@@ -202,18 +217,25 @@ async function scrapeTelegram(offset: number): Promise<{ posts: ScrapedPost[]; n
   const posts: ScrapedPost[] = []
   for (const upd of updates) {
     const msg = upd.channel_post ?? upd.message
-    if (!msg?.text) continue
-    const lower = msg.text.toLowerCase()
+    if (!msg) continue
+
+    const text = msg.text ?? msg.caption ?? ""
+    if (!text && !msg.photo) continue
+
+    const lower = text.toLowerCase()
     if (!KEYWORDS_LOWER.some((kw) => lower.includes(kw))) continue
 
     const chat = msg.chat
-    const handle = chat.username ? `@${chat.username}` : String(chat.id)
-    const url = chat.username
-      ? `https://t.me/${chat.username}/${msg.message_id}`
-      : `https://t.me/c/${String(chat.id).replace("-100", "")}/${msg.message_id}`
+    // If this is a forwarded message, link back to the original channel
+    const fwd = (upd.message as typeof upd.message & { forward_from_chat?: { username?: string; id: number }; forward_from_message_id?: number } | undefined)
+    const sourceChat = fwd?.forward_from_chat ?? chat
+    const sourceMsgId = fwd?.forward_from_message_id ?? msg.message_id
+    const url = sourceChat.username
+      ? `https://t.me/${sourceChat.username}/${sourceMsgId}`
+      : `https://t.me/c/${String(sourceChat.id).replace("-100", "")}/${sourceMsgId}`
 
     posts.push({
-      text: msg.text,
+      text: text || "[imagen sin texto]",
       url,
       postedAt: msg.date * 1000,
       platform: "telegram",
