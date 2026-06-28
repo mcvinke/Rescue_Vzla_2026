@@ -22,6 +22,7 @@ export default function LocationPicker({
   onPick: (lat: number, lng: number) => void
 }) {
   return (
+    <div style={{ position: "relative", zIndex: 0, isolation: "isolate" }}>
     <MapContainer
       center={value ? [value.lat, value.lng] : COAST_CENTER}
       zoom={13}
@@ -36,5 +37,6 @@ export default function LocationPicker({
       <ClickHandler onPick={onPick} />
       {value && <Marker position={[value.lat, value.lng]} icon={pickerIcon()} />}
     </MapContainer>
+    </div>
   )
 }
