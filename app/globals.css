@@ -133,3 +133,20 @@
   background: transparent;
   border: none;
 }
+
+/* Contain Leaflet z-indexes inside the location picker so they don't bleed over dialogs */
+.location-picker-wrap {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+.location-picker-wrap .leaflet-pane,
+.location-picker-wrap .leaflet-top,
+.location-picker-wrap .leaflet-bottom,
+.location-picker-wrap .leaflet-control {
+  z-index: 1 !important;
+}
+.location-picker-wrap .leaflet-pane canvas,
+.location-picker-wrap .leaflet-tile-pane {
+  z-index: 1 !important;
+}

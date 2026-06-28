@@ -22,7 +22,7 @@ export default function LocationPicker({
   onPick: (lat: number, lng: number) => void
 }) {
   return (
-    <div style={{ position: "relative", zIndex: 0, isolation: "isolate" }}>
+    <div className="location-picker-wrap">
     <MapContainer
       center={value ? [value.lat, value.lng] : COAST_CENTER}
       zoom={13}
