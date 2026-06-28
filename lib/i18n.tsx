@@ -1,12 +1,9 @@
 "use client"
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react"
+import { createContext, useCallback, useContext, type ReactNode } from "react"
 
-export type Lang = "es" | "en"
+type Dict = Record<string, { es: string; en?: string }>
 
-type Dict = Record<string, { es: string; en: string }>
-
-// All UI copy lives here so the app is fully bilingual. Spanish is the default.
 const DICT: Dict = {
   appName: { es: "RescateVzla", en: "RescateVzla" },
   appTagline: {
@@ -257,37 +254,20 @@ const DICT: Dict = {
 }
 
 interface I18nValue {
-  lang: Lang
-  setLang: (l: Lang) => void
+  lang: "es"
   t: (key: keyof typeof DICT) => string
 }
 
 const I18nContext = createContext<I18nValue | null>(null)
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("es")
-
-  useEffect(() => {
-    const stored = typeof window !== "undefined" ? (localStorage.getItem("rescate-lang") as Lang | null) : null
-    if (stored === "es" || stored === "en") setLangState(stored)
+  const t = useCallback((key: keyof typeof DICT) => {
+    const entry = DICT[key]
+    if (!entry) return String(key)
+    return entry["es"]
   }, [])
 
-  const setLang = useCallback((l: Lang) => {
-    setLangState(l)
-    if (typeof window !== "undefined") localStorage.setItem("rescate-lang", l)
-    if (typeof document !== "undefined") document.documentElement.lang = l
-  }, [])
-
-  const t = useCallback(
-    (key: keyof typeof DICT) => {
-      const entry = DICT[key]
-      if (!entry) return String(key)
-      return entry[lang]
-    },
-    [lang],
-  )
-
-  return <I18nContext.Provider value={{ lang, setLang, t }}>{children}</I18nContext.Provider>
+  return <I18nContext.Provider value={{ lang: "es", t }}>{children}</I18nContext.Provider>
 }
 
 export function useI18n() {

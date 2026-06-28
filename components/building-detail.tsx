@@ -19,15 +19,15 @@ const victimSelectClass =
 
 const SIGNAL_KINDS: SignalKind[] = ["voice", "knock", "noise", "movement"]
 
-const POSTER_FIELDS: { key: keyof ResidentInterview; labelEs: string; labelEn: string; warning?: boolean }[] = [
-  { key: "numResidents", labelEs: "Personas en el apartamento", labelEn: "People in the apartment" },
-  { key: "residentNames", labelEs: "Nombres y edades", labelEn: "Names and ages" },
-  { key: "usualLocation", labelEs: "Ubicación habitual en el edificio", labelEn: "Usual location in building" },
-  { key: "emergencyExits", labelEs: "Salidas de emergencia", labelEn: "Emergency exits" },
-  { key: "staircases", labelEs: "Escaleras", labelEn: "Staircases" },
-  { key: "safeZones", labelEs: "Zonas seguras / reforzadas", labelEn: "Safe / reinforced areas" },
-  { key: "hazards", labelEs: "Peligros específicos", labelEn: "Specific hazards", warning: true },
-  { key: "residentContacts", labelEs: "Contactos de otros residentes", labelEn: "Contacts for other residents" },
+const POSTER_FIELDS: { key: keyof ResidentInterview; labelEs: string; warning?: boolean }[] = [
+  { key: "numResidents", labelEs: "Personas en el apartamento" },
+  { key: "residentNames", labelEs: "Nombres y edades" },
+  { key: "usualLocation", labelEs: "Ubicación habitual en el edificio" },
+  { key: "emergencyExits", labelEs: "Salidas de emergencia" },
+  { key: "staircases", labelEs: "Escaleras" },
+  { key: "safeZones", labelEs: "Zonas seguras / reforzadas" },
+  { key: "hazards", labelEs: "Peligros específicos", warning: true },
+  { key: "residentContacts", labelEs: "Contactos de otros residentes" },
 ]
 
 function timeAgo(ts: number, lang: "es" | "en") {
@@ -249,7 +249,7 @@ export function BuildingDetail({
                     <div key={f.key}>
                       <p className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                         {f.warning && <AlertTriangle className="size-3 text-amber-500" aria-hidden />}
-                        {lang === "es" ? f.labelEs : f.labelEn}
+                        {f.labelEs}
                       </p>
                       <p className="text-xs leading-relaxed text-foreground">{value}</p>
                     </div>

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react"
 import { Activity, Building2, HeartPulse, Users } from "lucide-react"
 import { useI18n } from "@/lib/i18n"
 import type { Building } from "@/lib/types"
-import { LanguageToggle } from "./language-toggle"
 
 function timeAgo(ts: number, lang: "es" | "en") {
   const mins = Math.max(1, Math.round((Date.now() - ts) / 60000))
@@ -72,7 +71,6 @@ export function StatsHeader({ buildings, live }: { buildings: Building[]; live: 
               {t("lastUpdated")}: {timeAgo(stats.lastUpdated, lang)}
             </span>
           )}
-          <LanguageToggle />
         </div>
       </div>
 
