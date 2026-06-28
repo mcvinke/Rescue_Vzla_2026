@@ -11,3 +11,5 @@ jobs:
     steps:
       - name: Call scrape endpoint
         run: curl -X GET https://crisis-mapping-app.vercel.app/api/scrape
+      - name: Sync missing persons registry
+        run: curl -X GET https://crisis-mapping-app.vercel.app/api/sync-missing
