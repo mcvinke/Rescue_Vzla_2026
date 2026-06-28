@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Activity, DoorOpen, MapPin, Phone, Radio, UserPlus, X } from "lucide-react"
+import { Activity, AlertTriangle, ClipboardList, DoorOpen, MapPin, Phone, Radio, UserPlus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { useI18n } from "@/lib/i18n"
 import { useRescueStore } from "@/lib/rescue-store"
-import { activeVictims, cityName, priorityLevel, type Building, type SignalKind, type VictimStatus } from "@/lib/types"
+import { activeVictims, cityName, priorityLevel, type Building, type ResidentInterview, type SignalKind, type VictimStatus } from "@/lib/types"
 import { PRIORITY_BADGE, SEVERITY_BADGE, VICTIM_BADGE } from "@/lib/severity-style"
 import { cn } from "@/lib/utils"
 
@@ -18,6 +18,17 @@ const victimSelectClass =
   "h-7 rounded-md border border-input bg-input/30 px-1.5 text-xs outline-none focus-visible:border-ring"
 
 const SIGNAL_KINDS: SignalKind[] = ["voice", "knock", "noise", "movement"]
+
+const POSTER_FIELDS: { key: keyof ResidentInterview; labelEs: string; labelEn: string; warning?: boolean }[] = [
+  { key: "numResidents", labelEs: "Personas en el apartamento", labelEn: "People in the apartment" },
+  { key: "residentNames", labelEs: "Nombres y edades", labelEn: "Names and ages" },
+  { key: "usualLocation", labelEs: "Ubicación habitual en el edificio", labelEn: "Usual location in building" },
+  { key: "emergencyExits", labelEs: "Salidas de emergencia", labelEn: "Emergency exits" },
+  { key: "staircases", labelEs: "Escaleras", labelEn: "Staircases" },
+  { key: "safeZones", labelEs: "Zonas seguras / reforzadas", labelEn: "Safe / reinforced areas" },
+  { key: "hazards", labelEs: "Peligros específicos", labelEn: "Specific hazards", warning: true },
+  { key: "residentContacts", labelEs: "Contactos de otros residentes", labelEn: "Contacts for other residents" },
+]
 
 function timeAgo(ts: number, lang: "es" | "en") {
   const mins = Math.max(1, Math.round((Date.now() - ts) / 60000))
@@ -223,6 +234,30 @@ export function BuildingDetail({
               {t("reportedBy")}: {building.reportedBy}
             </span>
           </div>
+
+          {building.residentInterview && POSTER_FIELDS.some((f) => building.residentInterview![f.key]) && (
+            <div className="rounded-lg border border-amber-200/80 bg-amber-50/50 p-3 dark:border-amber-800/50 dark:bg-amber-950/20">
+              <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                <ClipboardList className="size-3.5" aria-hidden />
+                {t("posterInterview")}
+              </h4>
+              <div className="space-y-2">
+                {POSTER_FIELDS.map((f) => {
+                  const value = building.residentInterview![f.key]
+                  if (!value) return null
+                  return (
+                    <div key={f.key}>
+                      <p className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                        {f.warning && <AlertTriangle className="size-3 text-amber-500" aria-hidden />}
+                        {lang === "es" ? f.labelEs : f.labelEn}
+                      </p>
+                      <p className="text-xs leading-relaxed text-foreground">{value}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <Separator />
 

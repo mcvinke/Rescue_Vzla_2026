@@ -214,6 +214,30 @@ const DICT: Dict = {
   scrapeRunning: { es: "Ejecutando...", en: "Running..." },
   scrapeNever: { es: "Nunca", en: "Never" },
 
+  // Poster: resident interview
+  posterInterview: { es: "Entrevista a residentes", en: "Resident interview" },
+  posterInterviewHint: {
+    es: "Del poster de Rescate — preguntas a quien vivía en el edificio",
+    en: "From the Rescue poster — questions for former residents",
+  },
+  posterExpand: { es: "Agregar respuestas del poster", en: "Add poster answers" },
+  posterQ1: { es: "1. ¿Cuántas personas vivían en el apartamento?", en: "1. How many people lived in the apartment?" },
+  posterQ1Hint: { es: "Incluya visitas o familiares que dormían ahí.", en: "Include visitors or family members who slept there." },
+  posterQ2: { es: "2. ¿Quiénes son? Nombres y edades", en: "2. Who are they? Names and ages" },
+  posterQ2Hint: { es: "Niños, adultos mayores, personas con movilidad reducida.", en: "Children, elderly, people with limited mobility." },
+  posterQ3: { es: "3. ¿Dónde solían estar dentro del edificio?", en: "3. Where did they usually stay inside the building?" },
+  posterQ3Hint: { es: "Piso, número de apartamento, dormitorios, a qué hora.", en: "Floor, apartment number, bedrooms, at what time." },
+  posterQ4: { es: "4. ¿Dónde están las salidas de emergencia?", en: "4. Where are the emergency exits?" },
+  posterQ4Hint: { es: "Puertas, salidas traseras, accesos al estacionamiento.", en: "Doors, back exits, parking access." },
+  posterQ5: { es: "5. ¿Dónde están las escaleras?", en: "5. Where are the staircases?" },
+  posterQ5Hint: { es: "Principales y de servicio. ¿Cuántos pisos?", en: "Main and service stairs. How many floors?" },
+  posterQ6: { es: "6. ¿Hay zonas seguras o reforzadas?", en: "6. Are there safe or reinforced areas?" },
+  posterQ6Hint: { es: "Sótanos, baños, columnas, espacios sin colapsar.", en: "Basements, bathrooms, columns, uncollapsed areas." },
+  posterQ7: { es: "7. ¿Hay peligros específicos?", en: "7. Are there specific hazards?" },
+  posterQ7Hint: { es: "Gas, químicos, tanques, materiales pesados.", en: "Gas, chemicals, tanks, heavy materials." },
+  posterQ8: { es: "8. ¿Tiene contacto de otros residentes?", en: "8. Do you have contacts for other residents?" },
+  posterQ8Hint: { es: "Teléfonos de vecinos o familiares para verificar datos.", en: "Neighbor or family phones to verify data." },
+
   // Signs of life
   signsOfLife: { es: "Señales de vida", en: "Signs of life" },
   signsOfLifeDetected: { es: "Señales de vida detectadas", en: "Signs of life detected" },

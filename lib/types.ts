@@ -55,6 +55,17 @@ export interface Victim {
   signsOfLife: SignsOfLife | null
 }
 
+export interface ResidentInterview {
+  numResidents: string
+  residentNames: string
+  usualLocation: string
+  emergencyExits: string
+  staircases: string
+  safeZones: string
+  hazards: string
+  residentContacts: string
+}
+
 export interface Building {
   id: string
   name: string
@@ -77,6 +88,8 @@ export interface Building {
   accessNotes: string
   reportedBy: string
   source: string
+  /** Structured answers gathered by interviewing a former resident (from the rescue poster). */
+  residentInterview?: ResidentInterview
   victims: Victim[]
   createdAt: number
   updatedAt: number

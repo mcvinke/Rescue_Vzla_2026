@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MapPin, Loader2, CheckCircle2 } from "lucide-react"
+import { MapPin, Loader2, CheckCircle2, ChevronDown, ClipboardList } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,10 +15,35 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useI18n } from "@/lib/i18n"
 import { useRescueStore } from "@/lib/rescue-store"
-import { CITIES, type Severity, type BuildingStatus } from "@/lib/types"
+import { CITIES, type Severity, type BuildingStatus, type ResidentInterview } from "@/lib/types"
+import { cn } from "@/lib/utils"
 
 const selectClass =
   "h-9 w-full rounded-lg border border-input bg-input/30 px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+
+function PosterField({
+  id,
+  label,
+  hint,
+  value,
+  onChange,
+  rows,
+}: {
+  id: string
+  label: string
+  hint: string
+  value: string
+  onChange: (v: string) => void
+  rows: number
+}) {
+  return (
+    <div className="grid gap-1">
+      <Label htmlFor={id} className="text-xs font-medium leading-snug">{label}</Label>
+      <p className="text-[11px] text-muted-foreground">{hint}</p>
+      <Textarea id={id} rows={rows} value={value} onChange={(e) => onChange(e.target.value)} className="text-sm" />
+    </div>
+  )
+}
 
 async function geocodeAddress(address: string, city: string): Promise<{ lat: number; lng: number } | null> {
   const cityName = CITIES.find((c) => c.id === city)?.name ?? city
@@ -59,6 +84,17 @@ export function ReportBuildingDialog({
   const [geocodeError, setGeocodeError] = useState("")
   const [saving, setSaving] = useState(false)
 
+  // Resident interview (from the rescue poster)
+  const [showInterview, setShowInterview] = useState(false)
+  const [numResidents, setNumResidents] = useState("")
+  const [residentNames, setResidentNames] = useState("")
+  const [usualLocation, setUsualLocation] = useState("")
+  const [emergencyExits, setEmergencyExits] = useState("")
+  const [staircases, setStaircases] = useState("")
+  const [safeZones, setSafeZones] = useState("")
+  const [hazards, setHazards] = useState("")
+  const [residentContacts, setResidentContacts] = useState("")
+
   function reset() {
     setName("")
     setAddress("")
@@ -72,6 +108,15 @@ export function ReportBuildingDialog({
     setSource("WhatsApp")
     setLoc(null)
     setGeocodeError("")
+    setShowInterview(false)
+    setNumResidents("")
+    setResidentNames("")
+    setUsualLocation("")
+    setEmergencyExits("")
+    setStaircases("")
+    setSafeZones("")
+    setHazards("")
+    setResidentContacts("")
   }
 
   async function handleGeocode() {
@@ -95,6 +140,18 @@ export function ReportBuildingDialog({
     if (!valid || !loc) return
     setSaving(true)
     try {
+      const interviewFields: ResidentInterview = {
+        numResidents: numResidents.trim(),
+        residentNames: residentNames.trim(),
+        usualLocation: usualLocation.trim(),
+        emergencyExits: emergencyExits.trim(),
+        staircases: staircases.trim(),
+        safeZones: safeZones.trim(),
+        hazards: hazards.trim(),
+        residentContacts: residentContacts.trim(),
+      }
+      const hasInterview = Object.values(interviewFields).some((v) => v.length > 0)
+
       await addBuilding({
         name: name.trim(),
         address: address.trim(),
@@ -108,6 +165,9 @@ export function ReportBuildingDialog({
         accessNotes: accessNotes.trim(),
         reportedBy: reportedBy.trim() || "—",
         source,
+        signsOfLife: false,
+        signsOfLifeAt: null,
+        ...(hasInterview ? { residentInterview: interviewFields } : {}),
       })
       reset()
       onOpenChange(false)
@@ -249,6 +309,38 @@ export function ReportBuildingDialog({
               onChange={(e) => setAccessNotes(e.target.value)}
               placeholder="Ej: Escalera bloqueada, acceso por lado norte"
             />
+          </div>
+
+          {/* ── Poster: Entrevista a residentes ── */}
+          <div className="overflow-hidden rounded-lg border border-amber-300/70 dark:border-amber-700/50">
+            <button
+              type="button"
+              onClick={() => setShowInterview((v) => !v)}
+              className="flex w-full items-center gap-2.5 bg-amber-50/70 px-3 py-2.5 text-left dark:bg-amber-950/30"
+            >
+              <ClipboardList className="size-4 shrink-0 text-amber-600" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">{t("posterInterview")}</p>
+                <p className="text-[11px] text-muted-foreground">{t("posterInterviewHint")}</p>
+              </div>
+              <ChevronDown
+                className={cn("size-4 shrink-0 text-muted-foreground transition-transform", showInterview && "rotate-180")}
+                aria-hidden
+              />
+            </button>
+
+            {showInterview && (
+              <div className="grid gap-3 border-t border-amber-200/70 p-3 dark:border-amber-800/50">
+                <PosterField id="pi-1" label={t("posterQ1")} hint={t("posterQ1Hint")} value={numResidents} onChange={setNumResidents} rows={1} />
+                <PosterField id="pi-2" label={t("posterQ2")} hint={t("posterQ2Hint")} value={residentNames} onChange={setResidentNames} rows={2} />
+                <PosterField id="pi-3" label={t("posterQ3")} hint={t("posterQ3Hint")} value={usualLocation} onChange={setUsualLocation} rows={2} />
+                <PosterField id="pi-4" label={t("posterQ4")} hint={t("posterQ4Hint")} value={emergencyExits} onChange={setEmergencyExits} rows={2} />
+                <PosterField id="pi-5" label={t("posterQ5")} hint={t("posterQ5Hint")} value={staircases} onChange={setStaircases} rows={2} />
+                <PosterField id="pi-6" label={t("posterQ6")} hint={t("posterQ6Hint")} value={safeZones} onChange={setSafeZones} rows={2} />
+                <PosterField id="pi-7" label={t("posterQ7")} hint={t("posterQ7Hint")} value={hazards} onChange={setHazards} rows={2} />
+                <PosterField id="pi-8" label={t("posterQ8")} hint={t("posterQ8Hint")} value={residentContacts} onChange={setResidentContacts} rows={2} />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
